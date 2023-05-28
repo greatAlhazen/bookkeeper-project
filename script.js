@@ -25,3 +25,48 @@ addBookmark.addEventListener("click", showModal);
 close.addEventListener("click", () => (modalBox.style.display = "none"));
 // close modal window click event
 window.addEventListener("click", closeModal);
+
+function validate(nameValue, urlValue) {
+  // validate url via regex
+  const expression =
+    /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g;
+  const regex = new RegExp(expression);
+  if (!nameValue || !urlValue) {
+    alert("PLease specified fields");
+    return false;
+  }
+
+  if (!urlValue.match(regex)) {
+    alert("Please add correct url");
+    return false;
+  }
+
+  return true;
+}
+
+// form submit event
+form.addEventListener("submit", function (e) {
+  e.preventDefault();
+  const nameValue = websiteNameElement.value;
+  let urlValue = websiteUrlElement.value;
+  // adjust url
+  if (!urlValue.includes("https://") && !urlValue.includes("http://")) {
+    urlValue = `https://${urlValue}`;
+  }
+  console.log(nameValue, urlValue);
+  // validate name and url
+  if (!validate(nameValue, urlValue)) {
+    return false;
+  }
+
+  const bookmark = {
+    nameValue,
+    urlValue,
+  };
+
+  // save local storage
+  bookmarks.push(bookmark);
+  localStorage.setItem("bookmarks", JSON.stringify(bookmarks));
+  form.reset();
+  websiteNameElement.focus();
+});
