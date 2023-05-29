@@ -44,6 +44,47 @@ function validate(nameValue, urlValue) {
   return true;
 }
 
+// update ui
+function updateDom() {
+  bookmarkContainer.textContent = "";
+  bookmarks.forEach((bookmark) => {
+    const { nameValue, urlValue } = bookmark;
+    const htmlItem = `
+    <div class="container__item">
+        <img
+          src="https://s2.googleusercontent.com/s2/favicons?domain=${urlValue}"
+          alt=${nameValue}
+          class="container__image"
+        />
+        <a href=${urlValue} target="_blank" class="container__link"
+          >${nameValue}</a
+        >
+        <div class="container__delete" onClick="deleteBookmark('${urlValue}')">&#10006;</div>
+      </div>
+    `;
+
+    bookmarkContainer.insertAdjacentHTML("afterbegin", htmlItem);
+  });
+}
+
+// get value and save to localdatabase
+function fetchBookmarks() {
+  if (localStorage.getItem("bookmarks")) {
+    bookmarks = JSON.parse(localStorage.getItem("bookmarks"));
+  } else {
+    const bookmarks = [
+      {
+        nameValue: "test",
+        urlValue: "https://test.com",
+      },
+    ];
+
+    localStorage.setItem("bookmarks", JSON.stringify(bookmarks));
+  }
+  // call update ui
+  updateDom();
+}
+
 // form submit event
 form.addEventListener("submit", function (e) {
   e.preventDefault();
@@ -53,7 +94,6 @@ form.addEventListener("submit", function (e) {
   if (!urlValue.includes("https://") && !urlValue.includes("http://")) {
     urlValue = `https://${urlValue}`;
   }
-  console.log(nameValue, urlValue);
   // validate name and url
   if (!validate(nameValue, urlValue)) {
     return false;
@@ -64,9 +104,23 @@ form.addEventListener("submit", function (e) {
     urlValue,
   };
 
-  // save local storage
+  // save local storage and fetch bookmark
   bookmarks.push(bookmark);
   localStorage.setItem("bookmarks", JSON.stringify(bookmarks));
+  fetchBookmarks();
   form.reset();
   websiteNameElement.focus();
 });
+
+// delete bookmark
+function deleteBookmark(url) {
+  bookmarks = bookmarks.filter((bookmark) => {
+    return bookmark.urlValue !== url;
+  });
+
+  localStorage.setItem("bookmarks", JSON.stringify(bookmarks));
+  fetchBookmarks();
+}
+
+// call fetch function firstly
+fetchBookmarks();
